@@ -2,6 +2,7 @@
 package vallegrande.edu.pe.view;
 
 // Importa el controlador de usuarios para manejar la lógica
+import vallegrande.edu.pe.controller.EstudianteController;
 import vallegrande.edu.pe.controller.UsuarioController;
 
 // Importa clases de Swing y AWT necesarias para la interfaz gráfica
@@ -19,6 +20,8 @@ public class MiniPaginaView extends JFrame {
         this.controller = controller;   // Asigna el controlador recibido
         initUI();                        // Inicializa la interfaz gráfica
     }
+
+
 
     // Método que construye toda la interfaz de usuario
     private void initUI() {
@@ -71,8 +74,9 @@ public class MiniPaginaView extends JFrame {
         // Botón Administrar Docentes
         JButton btnDocentes = crearBotonMenu("📚 Administrar Docentes", new Color(34, 167, 240));
 
-        // Botón Administrar Estudiantes
         JButton btnEstudiantes = crearBotonMenu("🎓 Administrar Estudiantes", new Color(34, 153, 84));
+        btnEstudiantes.addActionListener(e -> new EstudianteCrudView(new EstudianteController()).setVisible(true));
+
 
         // Añade los botones al panel de menú
         menuPanel.add(btnUsuarios);
@@ -107,5 +111,4 @@ public class MiniPaginaView extends JFrame {
         return btn;                                           // Devuelve el botón
     }
 }
-
 
