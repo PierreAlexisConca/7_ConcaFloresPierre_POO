@@ -107,3 +107,148 @@ public class EstudianteCrudView extends JFrame {
                     JOptionPane.showMessageDialog(this, "Ya existe un estudiante con ese correo.", "Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
+                // Llamamos al controlador para agregar y recargamos la tabla
+                controller.addEstudiante(nombre, correo, curso);
+                cargarTodos();
+            }
+        });
+
+        // Acción del botón Editar: permite modificar la fila seleccionada
+        editButton.addActionListener(e -> {
+            int row = table.getSelectedRow();                    // fila seleccionada en la vista
+            if (row < 0) {                                      // si no hay fila seleccionada
+                JOptionPane.showMessageDialog(this, "Seleccione un estudiante para editar.", "Aviso", JOptionPane.INFORMATION_MESSAGE);
+                return;
+            }
+            // Obtenemos los valores actuales de la tabla
+            String currentNombre = (String) table.getValueAt(row, 0);
+            String currentCorreo = (String) table.getValueAt(row, 1);
+            String currentCurso = (String) table.getValueAt(row, 2);
+
+            // Creamos campos pre-llenados
+            JTextField nombreField = new JTextField(currentNombre);
+            JTextField correoField = new JTextField(currentCorreo);
+            JTextField cursoField = new JTextField(currentCurso);
+
+            // Panel de edición
+            JPanel form = new JPanel(new GridLayout(0, 1, 5, 5));
+            form.add(new JLabel("Nombre:")); form.add(nombreField);
+            form.add(new JLabel("Correo:")); form.add(correoField);
+            form.add(new JLabel("Curso:"));  form.add(cursoField);
+
+            // Mostramos diálogo de edición
+            int option = JOptionPane.showConfirmDialog(this, form, "Editar Estudiante", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+            // Si el usuario acepta, validamos y actualizamos
+            if (option == JOptionPane.OK_OPTION) {
+                String nombre = nombreField.getText().trim();
+                String correo = correoField.getText().trim();
+                String curso = cursoField.getText().trim();
+
+                // Validaciones
+                if (nombre.isEmpty() || correo.isEmpty() || curso.isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "Complete todos los campos.", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                if (!isValidEmail(correo)) {
+                    JOptionPane.showMessageDialog(this, "Ingrese un correo válido.", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                // Si el correo cambió y ya existe otro con ese correo, bloqueamos
+                // Obtener el estudiante original desde el controlador por índice
+                List<Estudiante> listaCompleta = controller.listarEstudiantes();
+                Estudiante original = listaCompleta.get(row);
+                if (!original.getCorreo().equalsIgnoreCase(correo) && controller.existeCorreo(correo)) {
+                    JOptionPane.showMessageDialog(this, "Ya existe otro estudiante con ese correo.", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                // Creamos un nuevo objeto con los datos modificados
+                Estudiante actualizado = new Estudiante(nombre, correo, curso);
+                // Llamamos al controlador para actualizar y recargamos la tabla
+                controller.updateEstudiante(row, actualizado);
+                cargarTodos();
+            }
+        });
+
+        // Acción del botón Eliminar: elimina la fila seleccionada con confirmación
+        deleteButton.addActionListener(e -> {
+            int row = table.getSelectedRow();                    // fila seleccionada
+            if (row < 0) {                                      // si no hay fila seleccionada
+                JOptionPane.showMessageDialog(this, "Seleccione un estudiante para eliminar.", "Aviso", JOptionPane.INFORMATION_MESSAGE);
+                return;
+            }
+            // Confirmación antes de borrar
+            int confirm = JOptionPane.showConfirmDialog(this, "¿Eliminar estudiante seleccionado?", "Confirmar", JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+                // Llamada al controlador para eliminar por índice y recarga
+                controller.deleteEstudiante(row);
+                cargarTodos();
+            }
+        });
+
+        // Añadimos los botones al panel de acciones
+        actionsPanel.add(addButton);
+        actionsPanel.add(editButton);
+        actionsPanel.add(deleteButton);
+
+        // Colocamos los subpaneles en el topPanel
+        topPanel.add(searchPanel, BorderLayout.WEST);         // búsqueda a la izquierda
+        topPanel.add(actionsPanel, BorderLayout.EAST);        // botones a la derecha
+
+        // Añadimos componentes a la ventana principal
+        add(topPanel, BorderLayout.NORTH);                    // panel superior
+        add(new JScrollPane(table), BorderLayout.CENTER);     // tabla central con scroll
+
+        // Panel inferior con botón recargar por si se desea
+        JPanel bottom = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JButton btnRefresh = new JButton("🔄 Recargar");
+        btnRefresh.addActionListener(e -> cargarTodos());     // recarga manual
+        bottom.add(btnRefresh);
+        add(bottom, BorderLayout.SOUTH);                      // añade al sur
+
+        // Finalmente cargamos todos los estudiantes en la tabla
+        cargarTodos();
+    }
+
+    // Método que filtra la tabla según el texto de búsqueda
+    private void filtrar() {
+        String text = txtSearch.getText().trim().toLowerCase(); // texto ingresado en minúsculas
+        // Si el texto está vacío, cargamos todos los estudiantes
+        if (text.isEmpty()) {
+            cargarTodos();
+            return;
+        }
+        // Si hay texto, filtramos la lista del controlador
+        List<Estudiante> todos = controller.listarEstudiantes();
+        tableModel.setRowCount(0); // limpiamos la tabla
+        // Recorremos y agregamos solo los que contengan el texto en nombre o correo
+        for (Estudiante e : todos) {
+            if (e.getNombre().toLowerCase().contains(text) || e.getCorreo().toLowerCase().contains(text)) {
+                tableModel.addRow(new Object[]{e.getNombre(), e.getCorreo(), e.getCurso()});
+            }
+        }
+    }
+
+    // Carga todos los estudiantes desde el controlador y llena la tabla
+    private void cargarTodos() {
+        tableModel.setRowCount(0);                          // vacía la tabla
+        // Obtenemos la lista completa desde el controlador
+        for (Estudiante e : controller.listarEstudiantes()) {
+            // Añade una fila por cada estudiante
+            tableModel.addRow(new Object[]{e.getNombre(), e.getCorreo(), e.getCurso()});
+        }
+    }
+
+    // Validación básica de correo (verifica presencia de '@' y '.')
+    private boolean isValidEmail(String email) {
+        if (email == null) return false;                    // nulo no válido
+        email = email.trim();                               // quitar espacios
+        // Condición mínima: contiene '@' y '.' y longitud razonable
+        return email.contains("@") && email.contains(".") && email.length() >= 5;
+    }
+}
+
+
+
+
+
