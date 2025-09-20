@@ -1,254 +1,171 @@
 // Paquete de vistas
 package vallegrande.edu.pe.view;
 
-import vallegrande.edu.pe.controller.EstudianteController;
-import vallegrande.edu.pe.model.Estudiante;
+import vallegrande.edu.pe.controller.CompraController;
+import vallegrande.edu.pe.model.Compra;
 
-import javax.swing.*;                       // componentes Swing
-import javax.swing.event.DocumentEvent;     // eventos al cambiar texto
-import javax.swing.event.DocumentListener;  // escucha cambios del campo de búsqueda
-import javax.swing.table.DefaultTableModel; // modelo de tabla
-import java.awt.*;                          // layouts y colores
-import java.util.List;                      // listas
+import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.util.List;
 
-// Vista Swing para gestionar estudiantes (CRUD con búsqueda, edición y persistencia)
-public class EstudianteCrudView extends JFrame {
+// Vista Swing para gestionar compras (CRUD con búsqueda, edición y persistencia)
+class CompraCrudView extends JFrame {
 
-    // Referencia al controlador que maneja la lógica y persistencia
-    private final EstudianteController controller;
-    // Modelo de la tabla que muestra los estudiantes
+    private final CompraController controller;
     private final DefaultTableModel tableModel;
-    // Campo de búsqueda para filtrar la tabla
     private final JTextField txtSearch = new JTextField(20);
-    // Tabla que presenta los datos
     private final JTable table;
 
-    // Constructor que recibe el controlador y construye la interfaz
-    public EstudianteCrudView(EstudianteController controller) {
-        this.controller = controller; // asigna el controlador
+    public CompraCrudView(CompraController controller) {
+        this.controller = controller;
 
-        // Configuración básica de la ventana
-        setTitle("Gestión de Estudiantes");                   // título de la ventana
-        setSize(900, 500);                                    // tamaño inicial
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);    // al cerrar solo esta ventana
-        setLocationRelativeTo(null);                          // centrar en pantalla
-        setLayout(new BorderLayout(8, 8));                    // layout con separación
+        setTitle("Gestión de Compras");
+        setSize(900, 500);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setLocationRelativeTo(null);
+        setLayout(new BorderLayout(8, 8));
 
-        // Inicializa el modelo de la tabla con columnas
-        tableModel = new DefaultTableModel(new Object[]{"Nombre", "Correo", "Curso"}, 0);
-        table = new JTable(tableModel);                       // crea la tabla con el modelo
-        table.setRowHeight(26);                               // altura de filas
-        table.setFont(new Font("SansSerif", Font.PLAIN, 14)); // fuente de contenido
+        // columnas: producto, tipo, fecha
+        tableModel = new DefaultTableModel(new Object[]{"Producto", "Tipo de pago", "Fecha de compra"}, 0);
+        table = new JTable(tableModel);
+        table.setRowHeight(26);
+        table.setFont(new Font("SansSerif", Font.PLAIN, 14));
 
-        // Panel superior: contiene búsqueda y botones
+        // Panel superior
         JPanel topPanel = new JPanel(new BorderLayout(8, 8));
-        // Subpanel izquierdo: campo de búsqueda
         JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        searchPanel.add(new JLabel("Buscar:"));               // etiqueta
-        searchPanel.add(txtSearch);                           // campo de búsqueda
+        searchPanel.add(new JLabel("Buscar:"));
+        searchPanel.add(txtSearch);
 
-        // Añadimos un listener al documento del campo de búsqueda para filtrar en tiempo real
         txtSearch.getDocument().addDocumentListener(new DocumentListener() {
-            // Método invocado cuando cambia el documento (insert)
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                filtrar();
-            }
-            // Método invocado cuando cambia el documento (remove)
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                filtrar();
-            }
-            // Método invocado cuando cambia el documento (change)
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                filtrar();
-            }
+            @Override public void insertUpdate(DocumentEvent e) { filtrar(); }
+            @Override public void removeUpdate(DocumentEvent e) { filtrar(); }
+            @Override public void changedUpdate(DocumentEvent e) { filtrar(); }
         });
 
-        // Subpanel derecho: botones de acción (Agregar, Editar, Eliminar)
         JPanel actionsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        JButton addButton = new JButton("➕ Agregar");         // botón agregar
-        JButton editButton = new JButton("✏️ Editar");        // botón editar
-        JButton deleteButton = new JButton("🗑 Eliminar");    // botón eliminar
+        JButton addButton = new JButton("➕ Agregar");
+        JButton editButton = new JButton("✏️ Editar");
+        JButton deleteButton = new JButton("🗑 Eliminar");
 
-        // Acción del botón Agregar: abre un diálogo para pedir datos y valida
+        // Agregar compra
         addButton.addActionListener(e -> {
-            // Creamos los campos del formulario
-            JTextField nombreField = new JTextField();
-            JTextField correoField = new JTextField();
-            JTextField cursoField = new JTextField();
+            JTextField productoField = new JTextField();
+            JTextField tipoField = new JTextField();
+            JTextField fechaField = new JTextField("yyyy-mm-dd");
 
-            // Creamos un panel con GridLayout para mantener orden
             JPanel form = new JPanel(new GridLayout(0, 1, 5, 5));
-            form.add(new JLabel("Nombre:")); form.add(nombreField);
-            form.add(new JLabel("Correo:")); form.add(correoField);
-            form.add(new JLabel("Curso:"));  form.add(cursoField);
+            form.add(new JLabel("Producto:")); form.add(productoField);
+            form.add(new JLabel("Tipo:")); form.add(tipoField);
+            form.add(new JLabel("Fecha de compra:")); form.add(fechaField);
 
-            // Mostramos dialogo con el panel
-            int option = JOptionPane.showConfirmDialog(this, form, "Nuevo Estudiante", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-            // Si el usuario presionó OK, validamos y agregamos
+            int option = JOptionPane.showConfirmDialog(this, form, "Nueva Compra", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
             if (option == JOptionPane.OK_OPTION) {
-                String nombre = nombreField.getText().trim();
-                String correo = correoField.getText().trim();
-                String curso = cursoField.getText().trim();
+                String producto = productoField.getText().trim();
+                String tipo = tipoField.getText().trim();
+                String fecha = fechaField.getText().trim();
 
-                // Validación básica: no vacíos y formato básico de correo
-                if (nombre.isEmpty() || correo.isEmpty() || curso.isEmpty()) {
+                if (producto.isEmpty() || tipo.isEmpty() || fecha.isEmpty()) {
                     JOptionPane.showMessageDialog(this, "Complete todos los campos.", "Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
-                if (!isValidEmail(correo)) {
-                    JOptionPane.showMessageDialog(this, "Ingrese un correo válido.", "Error", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-                // Verificar si ya existe el correo
-                if (controller.existeCorreo(correo)) {
-                    JOptionPane.showMessageDialog(this, "Ya existe un estudiante con ese correo.", "Error", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-                // Llamamos al controlador para agregar y recargamos la tabla
-                controller.addEstudiante(nombre, correo, curso);
+                controller.addCompra(producto, tipo, fecha);
                 cargarTodos();
             }
         });
 
-        // Acción del botón Editar: permite modificar la fila seleccionada
+        // Editar compra
         editButton.addActionListener(e -> {
-            int row = table.getSelectedRow();                    // fila seleccionada en la vista
-            if (row < 0) {                                      // si no hay fila seleccionada
-                JOptionPane.showMessageDialog(this, "Seleccione un estudiante para editar.", "Aviso", JOptionPane.INFORMATION_MESSAGE);
+            int row = table.getSelectedRow();
+            if (row < 0) {
+                JOptionPane.showMessageDialog(this, "Seleccione una compra para editar.", "Aviso", JOptionPane.INFORMATION_MESSAGE);
                 return;
             }
-            // Obtenemos los valores actuales de la tabla
-            String currentNombre = (String) table.getValueAt(row, 0);
-            String currentCorreo = (String) table.getValueAt(row, 1);
-            String currentCurso = (String) table.getValueAt(row, 2);
+            String currentProducto = (String) table.getValueAt(row, 0);
+            String currentTipo = (String) table.getValueAt(row, 1);
+            String currentFecha = (String) table.getValueAt(row, 2);
 
-            // Creamos campos pre-llenados
-            JTextField nombreField = new JTextField(currentNombre);
-            JTextField correoField = new JTextField(currentCorreo);
-            JTextField cursoField = new JTextField(currentCurso);
+            JTextField productoField = new JTextField(currentProducto);
+            JTextField tipoField = new JTextField(currentTipo);
+            JTextField fechaField = new JTextField(currentFecha);
 
-            // Panel de edición
             JPanel form = new JPanel(new GridLayout(0, 1, 5, 5));
-            form.add(new JLabel("Nombre:")); form.add(nombreField);
-            form.add(new JLabel("Correo:")); form.add(correoField);
-            form.add(new JLabel("Curso:"));  form.add(cursoField);
+            form.add(new JLabel("Producto:")); form.add(productoField);
+            form.add(new JLabel("Tipo:")); form.add(tipoField);
+            form.add(new JLabel("Fecha de compra:")); form.add(fechaField);
 
-            // Mostramos diálogo de edición
-            int option = JOptionPane.showConfirmDialog(this, form, "Editar Estudiante", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-            // Si el usuario acepta, validamos y actualizamos
+            int option = JOptionPane.showConfirmDialog(this, form, "Editar Compra", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
             if (option == JOptionPane.OK_OPTION) {
-                String nombre = nombreField.getText().trim();
-                String correo = correoField.getText().trim();
-                String curso = cursoField.getText().trim();
+                String producto = productoField.getText().trim();
+                String tipo = tipoField.getText().trim();
+                String fecha = fechaField.getText().trim();
 
-                // Validaciones
-                if (nombre.isEmpty() || correo.isEmpty() || curso.isEmpty()) {
+                if (producto.isEmpty() || tipo.isEmpty() || fecha.isEmpty()) {
                     JOptionPane.showMessageDialog(this, "Complete todos los campos.", "Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
-                if (!isValidEmail(correo)) {
-                    JOptionPane.showMessageDialog(this, "Ingrese un correo válido.", "Error", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-                // Si el correo cambió y ya existe otro con ese correo, bloqueamos
-                // Obtener el estudiante original desde el controlador por índice
-                List<Estudiante> listaCompleta = controller.listarEstudiantes();
-                Estudiante original = listaCompleta.get(row);
-                if (!original.getCorreo().equalsIgnoreCase(correo) && controller.existeCorreo(correo)) {
-                    JOptionPane.showMessageDialog(this, "Ya existe otro estudiante con ese correo.", "Error", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
 
-                // Creamos un nuevo objeto con los datos modificados
-                Estudiante actualizado = new Estudiante(nombre, correo, curso);
-                // Llamamos al controlador para actualizar y recargamos la tabla
-                controller.updateEstudiante(row, actualizado);
+                Compra actualizada = new Compra(producto, tipo, fecha);
+                controller.updateCompra(row, actualizada);
                 cargarTodos();
             }
         });
 
-        // Acción del botón Eliminar: elimina la fila seleccionada con confirmación
+        // Eliminar compra
         deleteButton.addActionListener(e -> {
-            int row = table.getSelectedRow();                    // fila seleccionada
-            if (row < 0) {                                      // si no hay fila seleccionada
-                JOptionPane.showMessageDialog(this, "Seleccione un estudiante para eliminar.", "Aviso", JOptionPane.INFORMATION_MESSAGE);
+            int row = table.getSelectedRow();
+            if (row < 0) {
+                JOptionPane.showMessageDialog(this, "Seleccione una compra para eliminar.", "Aviso", JOptionPane.INFORMATION_MESSAGE);
                 return;
             }
-            // Confirmación antes de borrar
-            int confirm = JOptionPane.showConfirmDialog(this, "¿Eliminar estudiante seleccionado?", "Confirmar", JOptionPane.YES_NO_OPTION);
+            int confirm = JOptionPane.showConfirmDialog(this, "¿Eliminar compra seleccionada?", "Confirmar", JOptionPane.YES_NO_OPTION);
             if (confirm == JOptionPane.YES_OPTION) {
-                // Llamada al controlador para eliminar por índice y recarga
-                controller.deleteEstudiante(row);
+                controller.deleteCompra(row);
                 cargarTodos();
             }
         });
 
-        // Añadimos los botones al panel de acciones
         actionsPanel.add(addButton);
         actionsPanel.add(editButton);
         actionsPanel.add(deleteButton);
 
-        // Colocamos los subpaneles en el topPanel
-        topPanel.add(searchPanel, BorderLayout.WEST);         // búsqueda a la izquierda
-        topPanel.add(actionsPanel, BorderLayout.EAST);        // botones a la derecha
+        topPanel.add(searchPanel, BorderLayout.WEST);
+        topPanel.add(actionsPanel, BorderLayout.EAST);
 
-        // Añadimos componentes a la ventana principal
-        add(topPanel, BorderLayout.NORTH);                    // panel superior
-        add(new JScrollPane(table), BorderLayout.CENTER);     // tabla central con scroll
+        add(topPanel, BorderLayout.NORTH);
+        add(new JScrollPane(table), BorderLayout.CENTER);
 
-        // Panel inferior con botón recargar por si se desea
         JPanel bottom = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         JButton btnRefresh = new JButton("🔄 Recargar");
-        btnRefresh.addActionListener(e -> cargarTodos());     // recarga manual
+        btnRefresh.addActionListener(e -> cargarTodos());
         bottom.add(btnRefresh);
-        add(bottom, BorderLayout.SOUTH);                      // añade al sur
+        add(bottom, BorderLayout.SOUTH);
 
-        // Finalmente cargamos todos los estudiantes en la tabla
         cargarTodos();
     }
 
-    // Método que filtra la tabla según el texto de búsqueda
     private void filtrar() {
-        String text = txtSearch.getText().trim().toLowerCase(); // texto ingresado en minúsculas
-        // Si el texto está vacío, cargamos todos los estudiantes
+        String text = txtSearch.getText().trim().toLowerCase();
         if (text.isEmpty()) {
             cargarTodos();
             return;
         }
-        // Si hay texto, filtramos la lista del controlador
-        List<Estudiante> todos = controller.listarEstudiantes();
-        tableModel.setRowCount(0); // limpiamos la tabla
-        // Recorremos y agregamos solo los que contengan el texto en nombre o correo
-        for (Estudiante e : todos) {
-            if (e.getNombre().toLowerCase().contains(text) || e.getCorreo().toLowerCase().contains(text)) {
-                tableModel.addRow(new Object[]{e.getNombre(), e.getCorreo(), e.getCurso()});
+        List<Compra> todas = controller.listarCompras();
+        tableModel.setRowCount(0);
+        for (Compra c : todas) {
+            if (c.getProducto().toLowerCase().contains(text) || c.getTipo().toLowerCase().contains(text)) {
+                tableModel.addRow(new Object[]{c.getProducto(), c.getTipo(), c.getFechaCompra()});
             }
         }
     }
 
-    // Carga todos los estudiantes desde el controlador y llena la tabla
     private void cargarTodos() {
-        tableModel.setRowCount(0);                          // vacía la tabla
-        // Obtenemos la lista completa desde el controlador
-        for (Estudiante e : controller.listarEstudiantes()) {
-            // Añade una fila por cada estudiante
-            tableModel.addRow(new Object[]{e.getNombre(), e.getCorreo(), e.getCurso()});
+        tableModel.setRowCount(0);
+        for (Compra c : controller.listarCompras()) {
+            tableModel.addRow(new Object[]{c.getProducto(), c.getTipo(), c.getFechaCompra()});
         }
     }
-
-    // Validación básica de correo (verifica presencia de '@' y '.')
-    private boolean isValidEmail(String email) {
-        if (email == null) return false;                    // nulo no válido
-        email = email.trim();                               // quitar espacios
-        // Condición mínima: contiene '@' y '.' y longitud razonable
-        return email.contains("@") && email.contains(".") && email.length() >= 5;
-    }
 }
-
-
-
-
-

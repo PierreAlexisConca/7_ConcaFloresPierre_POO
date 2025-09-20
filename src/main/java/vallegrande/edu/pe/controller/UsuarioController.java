@@ -19,9 +19,9 @@ public class UsuarioController {
         // Inicializa la lista de usuarios como un ArrayList vacío
         usuarios = new ArrayList<>();
         // Agrega datos de ejemplo a la lista de usuarios con sus roles correspondientes
-        usuarios.add(new Usuario("Valery Chumpitaz", "valery@correo.com", "Administrador"));
-        usuarios.add(new Usuario("Juan Pérez", "juan@correo.com", "Docente"));
-        usuarios.add(new Usuario("María López", "maria@correo.com", "Estudiante"));
+        usuarios.add(new Usuario("Conca Pierre", "Conca@correo.com", "Administrador"));
+        usuarios.add(new Usuario("Medalid Chaparro", "Medalid@correo.com", "Administrador"));
+        usuarios.add(new Usuario("Anthony Gala", "Anthony@correo.com", "Administrador"));
     }
 
     // Método que retorna la lista completa de usuarios

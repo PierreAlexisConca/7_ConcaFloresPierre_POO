@@ -2,7 +2,7 @@
 package vallegrande.edu.pe.view;
 
 // Importa el controlador de usuarios para manejar la lógica
-import vallegrande.edu.pe.controller.EstudianteController;
+import vallegrande.edu.pe.controller.CompraController;
 import vallegrande.edu.pe.controller.UsuarioController;
 
 // Importa clases de Swing y AWT necesarias para la interfaz gráfica
@@ -26,7 +26,7 @@ public class MiniPaginaView extends JFrame {
     // Método que construye toda la interfaz de usuario
     private void initUI() {
         // Configuración básica de la ventana
-        setTitle("Instituto Valle Grande - Portal Principal"); // Título de la ventana
+        setTitle("PALEES - Formulario de registro"); // Título de la ventana
         setSize(950, 550);                                     // Tamaño inicial de la ventana
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);       // Cierra la aplicación al cerrar la ventana
         setLocationRelativeTo(null);                          // Centra la ventana en la pantalla
@@ -38,7 +38,7 @@ public class MiniPaginaView extends JFrame {
         JPanel header = new JPanel();                          // Panel superior
         header.setBackground(new Color(0, 70, 140));          // Color de fondo azul corporativo
         header.setPreferredSize(new Dimension(getWidth(), 90));// Alto del banner
-        JLabel title = new JLabel("Bienvenido al Portal del Instituto Valle Grande"); // Texto del encabezado
+        JLabel title = new JLabel("Bienvenido a la nuestra empresa PALEES"); // Texto del encabezado
         title.setFont(new Font("SansSerif", Font.BOLD, 26));  // Fuente y tamaño
         title.setForeground(Color.WHITE);                     // Color del texto
         header.add(title);                                    // Añade el título al panel header
@@ -55,9 +55,9 @@ public class MiniPaginaView extends JFrame {
         // -------------------------------
         JPanel infoPanel = new JPanel();                      // Panel para información
         infoPanel.setBackground(Color.WHITE);                // Fondo blanco
-        JLabel infoLabel = new JLabel("<html><center><h2>Gestión Académica y Administrativa</h2>" +
-                "Administre usuarios, docentes y estudiantes desde un mismo lugar<br>" +
-                "Sistema institucional moderno y seguro</center></html>"); // Texto con HTML para formato
+        JLabel infoLabel = new JLabel("<html><center><h2>Gestión de compras y Administracion</h2>" +
+                "Administre compras, nuevos administradores<br>" +
+                "Sistema de Palees moderno y seguro</center></html>"); // Texto con HTML para formato
         infoLabel.setFont(new Font("SansSerif", Font.PLAIN, 16)); // Fuente
         infoPanel.add(infoLabel);                              // Añade el texto al panel infoPanel
 
@@ -71,11 +71,11 @@ public class MiniPaginaView extends JFrame {
         JButton btnUsuarios = crearBotonMenu("👤 Administrar Usuarios", new Color(0, 120, 215));
         btnUsuarios.addActionListener(e -> new UsuarioCrudView(controller).setVisible(true)); // Abre el CRUD al hacer clic
 
-        // Botón Administrar Docentes
-        JButton btnDocentes = crearBotonMenu("📚 Administrar Docentes", new Color(34, 167, 240));
+        // Botón Administrar Vendedores
+        JButton btnDocentes = crearBotonMenu("📚 Administrar Vendedores", new Color(34, 167, 240));
 
-        JButton btnEstudiantes = crearBotonMenu("🎓 Administrar Estudiantes", new Color(34, 153, 84));
-        btnEstudiantes.addActionListener(e -> new EstudianteCrudView(new EstudianteController()).setVisible(true));
+        JButton btnEstudiantes = crearBotonMenu("🎓 Administrar Compras", new Color(34, 153, 84));
+        btnEstudiantes.addActionListener(e -> new CompraCrudView(new CompraController()).setVisible(true));
 
 
         // Añade los botones al panel de menú
@@ -93,7 +93,7 @@ public class MiniPaginaView extends JFrame {
         // ===============================
         JPanel footer = new JPanel();                          // Panel inferior
         footer.setBackground(new Color(230, 230, 230));       // Fondo gris claro
-        JLabel lblFooter = new JLabel("© 2025 Instituto Valle Grande - Todos los derechos reservados"); // Texto
+        JLabel lblFooter = new JLabel("PALEES 2025- Todos los derechos reservados"); // Texto
         lblFooter.setFont(new Font("SansSerif", Font.ITALIC, 12)); // Fuente en cursiva
         footer.add(lblFooter);                                 // Añade el texto al footer
         add(footer, BorderLayout.SOUTH);                      // Añade el footer al sur de la ventana
